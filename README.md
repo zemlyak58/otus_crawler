@@ -9,11 +9,13 @@ EXCLUDE_URLS='.*github.com' python -u crawler/crawler.py https://vitkhab.github.
 
 <!-- Создание образа в yc crawler -1-> -->
 $ packer build -var-file=variables.json ./crawler_image.json
+
 <!-- проверка созданного образа -->
 $ yc compute image list
+
 <!-- Запуск instance с помощью terraform -->
 $ terraform apply
-<!-- Создание docker-machine -->
+
 
 <!-- # Создание instance ycloud -->
 <!-- yc compute instance create \ -->
@@ -23,18 +25,28 @@ $ terraform apply
 <!--   --create-boot-disk image-folder-id=standard-images,image-family=ubuntu-1804-lts,size=15 \ -->
 <!--   --ssh-key ~/.ssh/appuser.pub -->
 
-# Запуск docker-machine
+<!-- Запуск docker-machine -->
 docker-machine create \
   --driver generic \
   --generic-ip-address=`yc compute instance list | grep crawler-ci | awk '{print $10}'` \
   --generic-ssh-user ubuntu \
   --generic-ssh-key ~/.ssh/appuser \
   docker-crawler
+
 <!-- Подключение к Docker host'у -->
 eval $(docker-machine env docker-crawler)
 
-# Подключение к Docker host'у
-eval $(docker-machine env docker-host)
+<!-- создания образа -->
+docker build -t crawler ./
+
+<!-- запуск контейнера -->
+docker run -d --name crawler crawler
+
+<!-- rabbitmq -->
+curl -sSL https://raw.githubusercontent.com/bitnami/containers/main/bitnami/rabbitmq/docker-compose.yml > docker-compose.ymldocker-compose up -d
+
+<!-- UI web интерфейск crawler -->
+https://github.com/express42/search_engine_ui.git
 
 # Запуск контейнера с используем none-драйвера
 docker run -ti --rm --network none joffotron/docker-net-tools -c ifconfig
