@@ -1,0 +1,77 @@
+services:
+  rabbitmq:
+    image: docker.io/bitnami/rabbitmq:3.11
+    ports:
+      - '4369:4369'
+      - '5551:5551'
+      - '5552:5552'
+      - '5672:5672'
+      - '25672:25672'
+      - '15672:15672'
+    environment:
+      - RABBITMQ_SECURE_PASSWORD=yes
+      - RABBITMQ_LOGS=-
+    volumes:
+      - 'rabbitmq_data:/bitnami/rabbitmq/mnesia'
+    networks:
+      - crawler_net
+
+volumes:
+  rabbitmq_data:
+    driver: local
+
+
+version: '1.0'
+services:
+  mongo_db:
+    image: mongo:3.3
+    volumes:
+      - post_db:/data/db
+    networks:
+      - crawler_net
+
+services:
+  crawler:
+    build: search_engine_crawler
+    networks:
+      - crawler_net
+
+services:
+  crawler:
+    build: search_engine_ui
+    networks:
+      - crawler_net
+
+volumes:
+  post_db:
+  # prometheus_data:
+
+networks:
+  crawler_net:
+
+  # post:
+  #   # build: ./post-py
+  #   image: ${USERNAME}/post:${VERSION_POST}
+  #   networks:
+  #     - crawler_net
+
+  # prometheus:
+  #   build: ./prometheus
+  #   # image: ${USERNAME}/prometheus #:latest
+  #   image: prom/prometheus
+  #   ports:
+  #     # - '${PORTPROM}:${PORTPROM}'
+  #     - '9090:9090'
+  #   volumes: 
+  #     - prometheus_data:/prometheus
+  #   command: # Передаем доп параметры в командной строке
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--storage.tsdb.retention=1d' # Задаем время хранения метрик в 1 день
+  #   networks:
+  #     # - reddit
+  #     - front_net
+  #     - back_net
+
+
+
